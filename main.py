@@ -1,50 +1,48 @@
 import tkinter as tk
+from tkinter import ttk
+from tkinter import *
 import psycopg2
 
-# Создаем соединение с базой данных
-conn = psycopg2.connect(
-    host="127.0.0.1",
-    database="test_backup",
-    user="root",
+# import test
+import correspondenceWindow
+window = tk.Tk()
+window.geometry('400x400')
+# from insert import *
+
+connection = psycopg2.connect(
+    host="localhost",
+    database="korresp",
+    user="postgres",
     password="root"
 )
 
-# Создаем курсор для выполнения запросов
-cur = conn.cursor()
 
-# Создаем окно tkinter
-root = tk.Tk()
-root.title("Пример использования tkinter и PostgreSQL")
+# root = tk.Tk()
+# root.title("Траснпортная компания")
+# root.geometry('400x400')
 
-# Создаем функцию для выполнения запросов к базе данных
-def execute_query():
-    # Получаем введенный пользователем SQL-запрос
-    query = query_text.get("1.0", "end-1c")
+# button = tk.Button(root, text="Изменить таблицу correspondence", command=select.createWindow)
+# button.pack()
+# root.mainloop()
+# Выборка ID записи из базы данных
+cur = connection.cursor()
+# cur.execute("SELECT id FROM correspondence where id_sotrudnik = 2")
 
-    # Выполняем запрос
-    cur.execute("SELECT * FROM public.drivers;")
+id_record = cur.fetchone()[0]
 
-    # Получаем результаты и выводим их в текстовое поле
-    rows = cur.fetchall()
-    result_text.delete("1.0", "end")
-    for row in rows:
-        result_text.insert("end", f"{row}")
+# Создание переменной для текста
+id_text = tk.StringVar()
 
-# Создаем текстовое поле для ввода SQL-запросов
-query_text = tk.Text(root)
-query_text.pack()
+# Назначение переменной текстовому полю ввода
+e1 = tk.Entry(window, textvariable=id_text)
+e1.grid(row=1, column=1)
 
-# Создаем кнопку для выполнения запросов
-execute_button = tk.Button(root, text="Выполнить", command=execute_query)
-execute_button.pack()
+# Назначение значения переменной
+id_text.set(id_record)
 
-# Создаем текстовое поле для вывода результатов
-result_text = tk.Text(root)
-result_text.pack()
-
-# Запускаем главный цикл tkinter
-root.mainloop()
-
-# Закрываем соединение с базой данных
+# Закрытие подключения к базе данных
 cur.close()
-conn.close()
+connection.close()
+
+# Запуск окна
+window.mainloop()
