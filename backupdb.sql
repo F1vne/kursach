@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 15.2
--- Dumped by pg_dump version 15.2
+-- Dumped from database version 15.3
+-- Dumped by pg_dump version 15.3
 
--- Started on 2023-05-11 23:12:09
+-- Started on 2023-09-18 16:51:24
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,294 +18,210 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- TOC entry 220 (class 1255 OID 16455)
--- Name: oklad_func(); Type: PROCEDURE; Schema: public; Owner: postgres
---
-
-CREATE PROCEDURE public.oklad_func()
-    LANGUAGE plpgsql
-    AS $$
-declare
-	  rezult double precision;
-begin
-	select roads.distance * payment_work.salary  from roads 
-	inner join payment_work on roads.kod_m = payment_work.kod_m into rezult;
-	raise notice '%', rezult;
-end ;
-$$;
-
-
-ALTER PROCEDURE public.oklad_func() OWNER TO postgres;
-
---
--- TOC entry 221 (class 1255 OID 16457)
--- Name: oklad_func(integer); Type: PROCEDURE; Schema: public; Owner: postgres
---
-
-CREATE PROCEDURE public.oklad_func(IN kod integer)
-    LANGUAGE plpgsql
-    AS $$
-declare
-	  rezult double precision;
-begin
-	select roads.distance * payment_work.salary into rezult from roads 
-	inner join payment_work on roads.kod_m = payment_work.kod_m where roads.kod_m = kod;
-	raise notice '%', rezult;
-end ;
-$$;
-
-
-ALTER PROCEDURE public.oklad_func(IN kod integer) OWNER TO postgres;
-
---
--- TOC entry 222 (class 1255 OID 16458)
--- Name: update_procent_prize(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.update_procent_prize() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-begin
-	update prize set procent_prize = procent_prize + 0.10;
-	return new;
-end;
-$$;
-
-
-ALTER FUNCTION public.update_procent_prize() OWNER TO postgres;
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- TOC entry 217 (class 1259 OID 16417)
--- Name: cargo_transp; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 216 (class 1259 OID 24596)
+-- Name: correspondence; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.cargo_transp (
-    kod_m integer NOT NULL,
-    kod_dr integer NOT NULL,
-    date_otgr date,
-    date_prib date,
-    time_add double precision DEFAULT '0'::double precision NOT NULL
+CREATE TABLE public.correspondence (
+    id_korresp integer NOT NULL,
+    document_type character varying(255),
+    execution_date date,
+    receipt_date date,
+    id_sotrudnik integer,
+    id_org integer NOT NULL
 );
 
 
-ALTER TABLE public.cargo_transp OWNER TO postgres;
+ALTER TABLE public.correspondence OWNER TO postgres;
 
 --
--- TOC entry 215 (class 1259 OID 16402)
--- Name: drivers; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 214 (class 1259 OID 24577)
+-- Name: organization; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.drivers (
-    kod_dr integer NOT NULL,
-    fio character(100) NOT NULL,
-    adress character(100),
-    tel character(20),
-    work_exp integer
+CREATE TABLE public.organization (
+    name character varying(255) NOT NULL,
+    ownership character varying(255),
+    id_org integer NOT NULL
 );
 
 
-ALTER TABLE public.drivers OWNER TO postgres;
+ALTER TABLE public.organization OWNER TO postgres;
 
 --
--- TOC entry 219 (class 1259 OID 16445)
--- Name: date_work_drivers; Type: VIEW; Schema: public; Owner: postgres
+-- TOC entry 215 (class 1259 OID 24584)
+-- Name: sotrudniki; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE VIEW public.date_work_drivers AS
- SELECT drivers.kod_dr,
-    drivers.fio,
-    cargo_transp.date_otgr,
-    cargo_transp.date_prib
-   FROM (public.drivers
-     JOIN public.cargo_transp ON ((drivers.kod_dr = cargo_transp.kod_dr)));
-
-
-ALTER TABLE public.date_work_drivers OWNER TO postgres;
-
---
--- TOC entry 218 (class 1259 OID 16431)
--- Name: payment_work; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.payment_work (
-    kod_pw integer NOT NULL,
-    kod_m integer NOT NULL,
-    salary integer NOT NULL,
-    salary_time_add integer NOT NULL
+CREATE TABLE public.sotrudniki (
+    id_sotrudnik integer NOT NULL,
+    name character varying(255)
 );
 
 
-ALTER TABLE public.payment_work OWNER TO postgres;
+ALTER TABLE public.sotrudniki OWNER TO postgres;
 
 --
--- TOC entry 216 (class 1259 OID 16407)
--- Name: prize; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 217 (class 1259 OID 24616)
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.prize (
-    kod_prize integer NOT NULL,
-    kod_dr integer NOT NULL,
-    procent_prize double precision
+CREATE TABLE public.users (
+    login text,
+    passwd text,
+    id_sotrudnik integer
 );
 
 
-ALTER TABLE public.prize OWNER TO postgres;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
--- TOC entry 214 (class 1259 OID 16397)
--- Name: roads; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.roads (
-    kod_m integer NOT NULL,
-    name_m character(100) NOT NULL,
-    distance double precision NOT NULL
-);
-
-
-ALTER TABLE public.roads OWNER TO postgres;
-
---
--- TOC entry 3355 (class 0 OID 16417)
--- Dependencies: 217
--- Data for Name: cargo_transp; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO public.cargo_transp (kod_m, kod_dr, date_otgr, date_prib, time_add) VALUES (1, 3, '2023-01-12', '2023-01-15', 0);
-INSERT INTO public.cargo_transp (kod_m, kod_dr, date_otgr, date_prib, time_add) VALUES (2, 2, '2023-01-12', '2023-01-13', 1.15);
-INSERT INTO public.cargo_transp (kod_m, kod_dr, date_otgr, date_prib, time_add) VALUES (3, 1, '2023-02-22', '2023-02-23', 0.16);
-
-
---
--- TOC entry 3353 (class 0 OID 16402)
--- Dependencies: 215
--- Data for Name: drivers; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO public.drivers (kod_dr, fio, adress, tel, work_exp) VALUES (1, 'Андреев Андрей Андреевич                                                                            ', 'ул. Пушкина, д.12, кв.2                                                                             ', '+79053336161        ', 1);
-INSERT INTO public.drivers (kod_dr, fio, adress, tel, work_exp) VALUES (3, 'Васильев Василий Васильевич                                                                         ', 'ул. Б. Санкт-Петербугская, д.2, к.3, кв.199                                                         ', '89552348171         ', 2);
-INSERT INTO public.drivers (kod_dr, fio, adress, tel, work_exp) VALUES (2, 'Петров Петр Петрович                                                                                ', 'ул. Грибоедова, д.133, кв.422                                                                       ', '+79099936162        ', 1);
-
-
---
--- TOC entry 3356 (class 0 OID 16431)
--- Dependencies: 218
--- Data for Name: payment_work; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO public.payment_work (kod_pw, kod_m, salary, salary_time_add) VALUES (2, 1, 300, 350);
-INSERT INTO public.payment_work (kod_pw, kod_m, salary, salary_time_add) VALUES (1, 2, 200, 250);
-INSERT INTO public.payment_work (kod_pw, kod_m, salary, salary_time_add) VALUES (3, 3, 250, 150);
-
-
---
--- TOC entry 3354 (class 0 OID 16407)
+-- TOC entry 3337 (class 0 OID 24596)
 -- Dependencies: 216
--- Data for Name: prize; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: correspondence; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.prize (kod_prize, kod_dr, procent_prize) VALUES (1, 1, 0.25);
-INSERT INTO public.prize (kod_prize, kod_dr, procent_prize) VALUES (2, 2, 0.1);
-INSERT INTO public.prize (kod_prize, kod_dr, procent_prize) VALUES (3, 3, 0.35);
+COPY public.correspondence (id_korresp, document_type, execution_date, receipt_date, id_sotrudnik, id_org) FROM stdin;
+1	Договор	2022-01-15	2022-01-25	3	1
+3	Договор	2023-03-15	2023-03-20	2	2
+4	Уведомление	2023-03-19	2023-03-25	1	1
+5	Акт	2023-12-19	2023-12-25	3	3
+2	Письмо	2022-01-17	2022-01-20	1	4
+\.
 
 
 --
--- TOC entry 3352 (class 0 OID 16397)
+-- TOC entry 3335 (class 0 OID 24577)
 -- Dependencies: 214
--- Data for Name: roads; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: organization; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.roads (kod_m, name_m, distance) VALUES (1, 'Санкт-Петербург - Белгород                                                                          ', 100.332);
-INSERT INTO public.roads (kod_m, name_m, distance) VALUES (2, 'Санкт-Петербург - Москва                                                                            ', 50.3);
-INSERT INTO public.roads (kod_m, name_m, distance) VALUES (3, 'Великий Новгород - Москва                                                                           ', 150.23);
-
-
---
--- TOC entry 3199 (class 2606 OID 16406)
--- Name: drivers drivers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.drivers
-    ADD CONSTRAINT drivers_pkey PRIMARY KEY (kod_dr);
+COPY public.organization (name, ownership, id_org) FROM stdin;
+ОАО Газпром	Государственная	1
+ПАО ЛУКОЙЛ	Публичная	2
+ПАО Северсталь	Публичная	3
+Рога и копыта	Частная	4
+\.
 
 
 --
--- TOC entry 3203 (class 2606 OID 16435)
--- Name: payment_work payment_work_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3336 (class 0 OID 24584)
+-- Dependencies: 215
+-- Data for Name: sotrudniki; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.payment_work
-    ADD CONSTRAINT payment_work_pkey PRIMARY KEY (kod_pw);
-
-
---
--- TOC entry 3201 (class 2606 OID 16411)
--- Name: prize prize_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.prize
-    ADD CONSTRAINT prize_pkey PRIMARY KEY (kod_prize);
+COPY public.sotrudniki (id_sotrudnik, name) FROM stdin;
+1	Иванов Иван Иванович
+2	Петров Петр Петрович
+3	Сидоров Сидор Сидорович
+\.
 
 
 --
--- TOC entry 3197 (class 2606 OID 16401)
--- Name: roads roads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3338 (class 0 OID 24616)
+-- Dependencies: 217
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.roads
-    ADD CONSTRAINT roads_pkey PRIMARY KEY (kod_m);
-
-
---
--- TOC entry 3208 (class 2620 OID 16461)
--- Name: drivers add_procent_prize; Type: TRIGGER; Schema: public; Owner: postgres
---
-
-CREATE TRIGGER add_procent_prize AFTER UPDATE OF work_exp ON public.drivers FOR EACH ROW WHEN ((new.work_exp > old.work_exp)) EXECUTE FUNCTION public.update_procent_prize();
+COPY public.users (login, passwd, id_sotrudnik) FROM stdin;
+admin	1234	1
+senior_manager	1234	2
+product_manager	1234	3
+\.
 
 
 --
--- TOC entry 3204 (class 2606 OID 16412)
--- Name: prize kod_dr; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3189 (class 2606 OID 24600)
+-- Name: correspondence correspondence_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.prize
-    ADD CONSTRAINT kod_dr FOREIGN KEY (kod_dr) REFERENCES public.drivers(kod_dr);
-
-
---
--- TOC entry 3205 (class 2606 OID 16426)
--- Name: cargo_transp kod_dr; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.cargo_transp
-    ADD CONSTRAINT kod_dr FOREIGN KEY (kod_dr) REFERENCES public.drivers(kod_dr) NOT VALID;
+ALTER TABLE ONLY public.correspondence
+    ADD CONSTRAINT correspondence_pkey PRIMARY KEY (id_korresp);
 
 
 --
--- TOC entry 3206 (class 2606 OID 16421)
--- Name: cargo_transp kod_m; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3185 (class 2606 OID 24629)
+-- Name: organization organization_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.cargo_transp
-    ADD CONSTRAINT kod_m FOREIGN KEY (kod_m) REFERENCES public.roads(kod_m) NOT VALID;
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT organization_pkey PRIMARY KEY (id_org);
 
 
 --
--- TOC entry 3207 (class 2606 OID 16436)
--- Name: payment_work kod_m; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3187 (class 2606 OID 24590)
+-- Name: sotrudniki sotrudniki_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.payment_work
-    ADD CONSTRAINT kod_m FOREIGN KEY (kod_m) REFERENCES public.roads(kod_m);
+ALTER TABLE ONLY public.sotrudniki
+    ADD CONSTRAINT sotrudniki_pkey PRIMARY KEY (id_sotrudnik);
 
 
--- Completed on 2023-05-11 23:12:10
+--
+-- TOC entry 3190 (class 2606 OID 24630)
+-- Name: correspondence id_org; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.correspondence
+    ADD CONSTRAINT id_org FOREIGN KEY (id_org) REFERENCES public.organization(id_org) NOT VALID;
+
+
+--
+-- TOC entry 3191 (class 2606 OID 24606)
+-- Name: correspondence id_sotrudnik; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.correspondence
+    ADD CONSTRAINT id_sotrudnik FOREIGN KEY (id_sotrudnik) REFERENCES public.sotrudniki(id_sotrudnik) NOT VALID;
+
+
+--
+-- TOC entry 3192 (class 2606 OID 24621)
+-- Name: users id_sotrudnik; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT id_sotrudnik FOREIGN KEY (id_sotrudnik) REFERENCES public.sotrudniki(id_sotrudnik);
+
+
+--
+-- TOC entry 3344 (class 0 OID 0)
+-- Dependencies: 216
+-- Name: TABLE correspondence; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.correspondence TO admin;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.correspondence TO manager;
+GRANT SELECT ON TABLE public.correspondence TO sotrudnik;
+
+
+--
+-- TOC entry 3345 (class 0 OID 0)
+-- Dependencies: 214
+-- Name: TABLE organization; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.organization TO admin;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.organization TO manager;
+
+
+--
+-- TOC entry 3346 (class 0 OID 0)
+-- Dependencies: 215
+-- Name: TABLE sotrudniki; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.sotrudniki TO admin;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.sotrudniki TO manager;
+GRANT SELECT ON TABLE public.sotrudniki TO sotrudnik;
+
+
+-- Completed on 2023-09-18 16:51:25
 
 --
 -- PostgreSQL database dump complete
