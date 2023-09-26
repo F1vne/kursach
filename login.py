@@ -1,9 +1,9 @@
-# импортируем библиотеку tkinter всю сразу
 from tkinter import *
 import tkinter as tk
 import psycopg2
 from tkinter import messagebox
-import hashlib
+import connection
+import re
 
 # главное окно приложения
 window = Tk()
@@ -36,43 +36,40 @@ header_padding = {'padx': 10, 'pady': 12}
 
 # обработчик нажатия на клавишу 'Войти'
 def clicked( ):
-    login = username_entry.get()
-    password = password_entry.get()
+	login = username_entry.get()
+	password = password_entry.get()
 
-    db_host = 'localhost';
-    db_database = 'korresp';
-    db_user = 'postgres';
-    db_password = 'root';
-    conn = psycopg2.connect(
-        host = db_host,
-        database = db_database,
-        user = db_user,
-        password = db_password
-    )
+	conn = psycopg2.connect(
+		host=connection.host,
+		database=connection.database,
+		user=connection.user,
+		password=connection.password
+	)
 
-    cursor = conn.cursor()
+	cursor = conn.cursor()
 
 
-    query = """SELECT * FROM public.users WHERE login = %s AND passwd = %s"""
+	query = """SELECT access_level FROM public.users WHERE login = %s AND passwd = %s"""
 
-    # cursor.execute(query, (login, password))
-    cursor.execute(query, (login, password))
-    result = cursor.fetchone()
+	cursor.execute(query, (login, password))
+	access_level = re.sub('\D', '', str(cursor.fetchone()))
 
 
-    if result is None:
-        # status_label.config(text="Invalid login or password")
-        messagebox.showinfo('Результат', 'Неверные логин или пароль')
-    else:
-        # status_label.config(text="Login successful")
-        messagebox.showinfo('Результат', 'Вход прошел успешно')
-        username_entry.delete(0, 'end')
-        password_entry.delete(0, 'end')
-        login = username_entry.get()
-        from home import checked_rezult
-    #     вызвать функцию для окна с карточками кнопками с таблицами в зависимости от введонного логина admin, senior_manager, product_manager
-    cursor.close()
-    conn.close()
+	if access_level is None:
+		# status_label.config(text="Invalid login or password")
+		messagebox.showinfo('Результат', 'Неверные логин или пароль')
+	else:
+		# status_label.config(text="Login successful")
+		messagebox.showinfo('Результат', 'Вход прошел успешно')
+		username_entry.delete(0, 'end')
+		password_entry.delete(0, 'end')
+
+		window.destroy()
+		window.mainloop()
+		from home import checked_rezult
+		checked_rezult(access_level)
+	cursor.close()
+	conn.close()
 
 # заголовок формы: настроены шрифт (font), отцентрирован (justify), добавлены отступы для заголовка
 # для всех остальных виджетов настройки делаются также
@@ -93,7 +90,7 @@ password_label = Label(window, text='Пароль', font=label_font , **base_pad
 password_label.pack()
 
 # поле ввода пароля
-password_entry = Entry(window, bg='#fff', fg='#444', font=font_entry)
+password_entry = Entry(window, bg='#fff', fg='#444', font=font_entry, show="*")
 password_entry.pack()
 
 # кнопка отправки формы
